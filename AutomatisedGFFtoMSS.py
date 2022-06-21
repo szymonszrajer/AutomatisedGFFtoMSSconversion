@@ -5,7 +5,11 @@ import sys
 from Bio import SeqIO
 from Bio import Seq
 from BCBio import GFF
+import fileinput
 import re
+import csv
+import pandas as pd
+
 
 # function handling transformation of CDS/exon records in gff file
 def CDSmRNA(COUNT, CDS_f, POSITION, out_JOINT, out_JOINT_CLOSE):
@@ -167,12 +171,6 @@ for j in range (i, cap):
 in_handle.close()
  
 
-
- #!/usr/bin/env python
-import fileinput
-import re
-
-
 # fixes the "First codon is not a start codon error"
 def first(location):
     rewrite = location.split('(')
@@ -253,18 +251,6 @@ with fileinput.FileInput("mss_duplicates_20", inplace=True) as file:
             else :  print(line, end = '') # no replacement
 
 
-
-
-
-
-
-import re
-import sys
-import csv
-import pandas as pd
-from BCBio import GFF
-from Bio import Seq, SeqIO
-
 array = []
 gff_file = "gff_tosort.gff"
 in_handle = open(gff_file)
@@ -301,9 +287,6 @@ with open("gff_sorted", "w") as out_handle:
 
 
 
-import re
-import fileinput
-
 
 filename = "mss_duplicates_20_re"
 fileW = open(filename, "w")
@@ -326,7 +309,3 @@ fileW.close()
 
 
 
-
-        #counter += len(res)
-        #res = []
-        #res = re.findall(r"\(\w+\s\w+.+\)",line)
