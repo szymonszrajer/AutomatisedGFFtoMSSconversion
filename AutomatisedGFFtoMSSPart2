@@ -1,3 +1,19 @@
+#!/usr/bin/python
+# coding: UTF-8
+
+import sys
+from Bio import SeqIO
+from Bio import Seq
+from BCBio import GFF
+import fileinput
+import re
+import csv
+import pandas as pd
+
+#------------------------------------------
+# Second part of the script: fixing translation errors -> fixing syntax erros
+# Translation errors
+
 # fixes the "First codon is not a start codon error"
 def first(location):
     rewrite = location.split('(')
@@ -27,6 +43,9 @@ def final(location):
 
     return location
 
+
+
+args = sys.argv
 
 filename = "errors_dup_bef20"    # errors file
 fileR = open(filename, "r")
@@ -79,19 +98,21 @@ with fileinput.FileInput("mss_duplicates_20", inplace=True) as file:
 
 
 
+#---------------------------------------------------
+# Syntax errors
 
 filename = "mss_duplicates_20_re"
 fileW = open(filename, "w")
-#res = []
+
 
 with fileinput.FileInput("mss_duplicates_20") as file:
     for line in file:
-        line = re.sub(r"\(\w+\s\w+.+\)","",line)
-        line = re.sub(r"\\","",line)
-        match  = re.search(r"(Scaffold)([0-9]+)",line)
+        line = re.sub(r"\(\w+\s\w+.+\)","",line) # remove species names
+        line = re.sub(r"\\","",line) # remove backslashes
+        match  = re.search(r"(Scaffold)([0-9]+)",line) 
         if match:
-            replacement = "BOPP0" + str(int(match.group(2)) + 1000000)
-            line = re.sub(match.group(0),replacement,line)
+            replacement = "BOPP0" + str(int(match.group(2)) + 1000000) 
+            line = re.sub(match.group(0),replacement,line) # replace "scaffold" with names appointed by the DDBJ
         fileW.write(line)
 
 

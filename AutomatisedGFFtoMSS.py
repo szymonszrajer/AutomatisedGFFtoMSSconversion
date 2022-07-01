@@ -70,16 +70,9 @@ Contig_Count = 0
 i = 0
 cap = len(precedence)
 
-filename = "scafforder"
-fileW = open(filename, "w")
-  
 
-"""
-for n in range (0,cap):
-    limit_info = scaffolds[n]
-    fileW.write(str(n) +  "\n")
-    in_handle = open(gff_file)
-"""    
+
+
 in_handle = open(gff_file)
 for rec in GFF.parse(in_handle): # for every scaffold   
     fileW.write(rec.id + "\n")
