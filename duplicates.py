@@ -2,7 +2,7 @@ import re
 import fileinput
 
 
-filename = "slines"
+filename = "duplicate_lines"
 fileW = open(filename, "w")
 
 with fileinput.FileInput("duplicates.txt") as file:
