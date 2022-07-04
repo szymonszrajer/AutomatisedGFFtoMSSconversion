@@ -9,7 +9,6 @@ import fileinput
 import re
 import csv
 import pandas as pd
-import monk
 
 #monkey patching a function from a GFF module in order to make it not sort the GFF file
 
