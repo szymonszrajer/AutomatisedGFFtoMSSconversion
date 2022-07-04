@@ -6,7 +6,7 @@ import re
 import pandas as pd
 
 #------------------------------------------
-# Second part of the script: fixing translation errors -> fixing syntax erros
+# Part 2:  fixing translation errors -> fixing syntax erros
 # Translation errors
 
 # fixes the "First codon is not a start codon error"
