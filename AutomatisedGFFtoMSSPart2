@@ -1,13 +1,8 @@
 #!/usr/bin/python
 # coding: UTF-8
 
-import sys
-from Bio import SeqIO
-from Bio import Seq
-from BCBio import GFF
 import fileinput
 import re
-import csv
 import pandas as pd
 
 #------------------------------------------
@@ -46,52 +41,44 @@ def final(location):
 
 
 args = sys.argv
-
-filename = "errors_dup_bef20"    # errors file
-fileR = open(filename, "r")
-
+transChecker_errors = args[0] # output of transChecker
+mss_file = args[1] # converted mss file 
 filename = "what_to_fix"    # generated file with information how to solve things
-fileW = open(filename, "w")
 
 
-
-
-for line in fileR:
-  if line[0] == '>': # new location of error
-    location = line.split()[1]
-    oldLocation = location
-    while line[0:2] != "//": # until errors for this location dont end
-        line = fileR.readline()
-        if (line.split()[0] == "TC0017:ER2:"): # first codon error
-            location = first(location)
-        if (line.split()[0] == "TC0018:ER2:"): # final codon error
-            location = final(location)
-    uninterrupted = oldLocation + ";" + location + "\n" # write to fix file in "bad_location;location_fix" manner
-    fileW.write(uninterrupted)
-
-
-fileR.close()
-fileW.close()
-
+with fileinput.FileInput(filename) as out_file
+    with fileinput.FileInput(transChecker_errors) as in_file
+        for line in in_handle:
+        if line[0] == '>': # new location of error
+            location = line.split()[1]
+            oldLocation = location
+            while line[0:2] != "//": # until errors for this location dont end
+                line = fileR.readline()
+                if (line.split()[0] == "TC0017:ER2:"): # first codon error
+                    location = first(location)
+                if (line.split()[0] == "TC0018:ER2:"): # final codon error
+                    location = final(location)
+            uninterrupted = oldLocation + ";" + location + "\n" # write to fix file in "bad_location;location_fix" manner
+            in_file2.write(uninterrupted)
         
 
 
-with fileinput.FileInput("mss_duplicates_20", inplace=True) as file:
+with fileinput.FileInput(mss_file, inplace=True) as out_file:
     x = 0 # position in replacement file
-    for line in file: # for line in mss file
+    for line in out_file: # for line in mss file
             splitted = re.split(r'\t+', line) # splitted line by tabs
-            flag = 0 #flag to check if replacement in the line is being made
+            flag = 0 # flag to check if replacement in the line is being made
             if splitted[1] == "CDS": # if given line is CDS of mRNA header
-                with open("what_to_fix") as f: # with open file with things that need to be fixed
-                    for linee in f.readlines()[x:]: # opening the file from a new position as to not overwrite the fixed errors
+                with open(filename) as in_file: # with open file with things that need to be fixed
+                    for linee in in_file.readlines()[x:]: # opening the file from a new position as to not overwrite the fixed errors
                         replacement = linee.split(";") # version giving an error and the new version are separated my a ';' in a file
                         r1 = replacement[0] # old version
                         r2 = replacement[1] # new version
                         if r1 == splitted[2]: # if location is approptiate
                             x += 1 # new file opening position
-                            flag = 1 # replacement needs to be done                           ###
-                            savedR1 = r1.rstrip('\n') # stripping the line of the newline     ###
-                            savedR2 = r2.rstrip('\n')                                         ###
+                            flag = 1 # replacement needs to be done                           
+                            savedR1 = r1.rstrip('\n') # stripping the line of the newline     
+                            savedR2 = r2.rstrip('\n')                                         
                             break;
             if flag == 1 : print(line.replace(savedR1,savedR2), end='') # replacement to be done ###
             else :  print(line, end = '') # no replacement
@@ -101,11 +88,8 @@ with fileinput.FileInput("mss_duplicates_20", inplace=True) as file:
 #---------------------------------------------------
 # Syntax errors
 
-filename = "mss_duplicates_20_re"
-fileW = open(filename, "w")
 
-
-with fileinput.FileInput("mss_duplicates_20") as file:
+with fileinput.FileInput(mss_file, inplace = True) as file:
     for line in file:
         line = re.sub(r"\(\w+\s\w+.+\)","",line) # remove species names
         line = re.sub(r"\\","",line) # remove backslashes
@@ -113,8 +97,10 @@ with fileinput.FileInput("mss_duplicates_20") as file:
         if match:
             replacement = "BOPP0" + str(int(match.group(2)) + 1000000) 
             line = re.sub(match.group(0),replacement,line) # replace "scaffold" with names appointed by the DDBJ
-        fileW.write(line)
+        match  = re.search(r"GBI",line) 
+        if match:
+            replacement = "GBIM" 
+            line = re.sub(match.group(0),replacement,line) 
 
+        print(line, end = '')
 
-
-fileW.close()
