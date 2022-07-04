@@ -58,9 +58,14 @@ def CDSmRNA(count, CDS_f, position, out_joint, out_joint_close):
                 
 # function printing resulting CDS 
 def printCDS(out_strand, out_joint, position, out_joint_close, out_strand_close, locus_tag_ID, mRNA_ID, product_name, transl_table):
+                split = re.search(r"(Similar to )([0-9]+)(:)([.]+)",product_name[0])
+                product = split.group(4)
+                note =  split.group(1) + split.group(2) + " NCBI"
+                
                 print(f"\tCDS\t"+ out_strand + out_joint + position + out_joint_close + out_strand_close + "\tcodon_start\t1" )
                 print("\t\t\t" + "locus_tag\t" + mRNA_ID[0])
-                print("\t\t\t" + "note\t" + product_name[0])
+                print("\t\t\t" + "product\t" + product)
+                print("\t\t\t" + "note\t" + note)
                 print("\t\t\t" + "transl_table\t" + transl_table[0])
 
 # function printing resulting mRNA
@@ -91,7 +96,7 @@ for fasta in fasta_sequences:
     lengths[name] = length 
     scaffolds[order] = name 
     precedence[name] = order 
-    gaps = ([[m.start(0), m.end(0)] for m in re.finditer(r"N{10,}", str(fasta.seq))]) 
+    gaps = ([[m.start(0), m.end(0)] for m in re.finditer(r"N{10,}", str(fasta.seq))]) # annotating assembly gaps
     assembly_gaps[name] = gaps
     order += 1 
 
