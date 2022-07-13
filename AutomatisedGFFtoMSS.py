@@ -3,41 +3,80 @@
 
 import sys
 from Bio import SeqIO
-from Bio import Seq
 from BCBio import GFF
-import fileinput
 import re
-import csv
-import pandas as pd
+import copy
 
 #monkey patching a function from a GFF module in order to make it not sort the GFF file
 
-def monkey_parse_in_parts(self, gff_files, base_dict=None, limit_info=None,
-        target_lines=None):
+def monkey_parse_in_parts(self, gff_files, base_dict=None, limit_info=None, target_lines=None):
         """Parse a region of a GFF file specified, returning info as generated.
 
         target_lines -- The number of lines in the file which should be used
         for each partial parse. This should be determined based on available
         memory.
         """
-    for results in self.parse_simple(gff_files, limit_info, target_lines):
-        if base_dict is None:
-            cur_dict = dict()
-        else:
-            cur_dict = copy.deepcopy(base_dict)
-        cur_dict = self._results_to_features(cur_dict, results)
-        all_ids = list(cur_dict.keys())
-        # all_ids.sort()               <---------------- the patched part
-        for cur_id in all_ids:
-            yield cur_dict[cur_id]
+        for results in self.parse_simple(gff_files, limit_info, target_lines):
+            if base_dict is None:
+                cur_dict = dict()
+            else:
+                cur_dict = copy.deepcopy(base_dict)
+            cur_dict = self._results_to_features(cur_dict, results)
+            all_ids = list(cur_dict.keys())
+            # all_ids.sort()               <---------------- the patched part
+            for cur_id in all_ids:
+                yield cur_dict[cur_id]
 
-BCBio.GFF._AbstractMapReduceGFF.parse_in_parts = monkey_parse_in_parts
-
-
+GFF.parse_in_parts = monkey_parse_in_parts
 
 
 #-----------------------------------------------
-#Part 1 GFF to MSS file conversion
+#Part 1 Sorting
+
+
+# input
+args = sys.argv
+gff_file = args[1] # gff input file
+fasta_file = args[2] # fasta input file 
+mol_type = args[3]  # type of molecule 
+organism = args[4] # type of organism
+strain = args[5] # organism strain
+country = args[6] # country
+
+"""
+array = []
+
+with fileinput.FileInput(gff_file) as in_file:
+    for line in in_file: # for every line
+        if line[0] != '#' :
+            whole_line = line
+            whole_line = whole_line.strip('\n')
+            line = line.split('\t')
+            rec_id = int(re.findall(r"\d+",line[0])[0])
+            start = int(line[3])
+            if  None != re.findall(r"Parent=",line[8]): parent = 1 
+            else : parent = 0
+            array.append([rec_id,start,parent,whole_line])
+
+
+gff_tobesorted = pd.DataFrame(array, columns=("rec_id","start","parent","line"))
+sorted_gff = gff_tobesorted.sort_values(by=['rec_id','start','parent'],ascending=[True,True,False])
+
+
+sorted_gff.to_csv('gff_sorted',columns=['line'],index=False,header=None)
+
+
+
+with fileinput.FileInput("gff_sorted", inplace=True) as in_file:
+    for line in in_file:
+        line = line.replace('"','').strip("\n")
+        print(line)
+
+gff_file = "gff_sorted"
+"""
+
+#-----------------------------------------------
+#Part 2 GFF to MSS file conversion
 
 
 # function handling transformation of CDS/exon records in gff file
@@ -58,29 +97,41 @@ def CDSmRNA(count, CDS_f, position, out_joint, out_joint_close):
                 
 # function printing resulting CDS 
 def printCDS(out_strand, out_joint, position, out_joint_close, out_strand_close, locus_tag_ID, mRNA_ID, product_name, transl_table):
-                split = re.search(r"(Similar to )([0-9]+)(:)([.]+)",product_name[0])
-                product = split.group(4)
-                note =  split.group(1) + split.group(2) + " NCBI"
                 
+                noteprint = 0
+                case = re.search(r"(Similar to [Uu]ncharacterized)", product_name[0])
+                if case:
+                    product = "uncharacterized protein" 
+                else:
+                    case = re.search(r"(Similar to)", product_name[0])
+                    if case:
+                        case2 = re.search(r"(Similar to )([\'\:\(\)\[\]\/\\A-Za-z0-9\._-]+)(:)(\s)(.+)",product_name[0])
+                        if case2:
+                            product = case2.group(5)
+                            noteprint = 1
+                            note =  case2.group(1) + case2.group(2) + " NCBI"
+
+                        else:
+                            case2 = re.search(r"(Similar to )(.+)",product_name[0])
+                            product = case2.group(2)
+                        
+                    else:
+                        product = product_name[0]
+
+
                 print(f"\tCDS\t"+ out_strand + out_joint + position + out_joint_close + out_strand_close + "\tcodon_start\t1" )
                 print("\t\t\t" + "locus_tag\t" + mRNA_ID[0])
                 print("\t\t\t" + "product\t" + product)
-                print("\t\t\t" + "note\t" + note)
+                if (noteprint): print("\t\t\t" + "note\t" + note)
                 print("\t\t\t" + "transl_table\t" + transl_table[0])
+                
+
 
 # function printing resulting mRNA
 def printmRNA(out_strand, out_joint, position, out_joint_close, out_strand_close, locus_tag_ID, mRNA_ID, product_name, transl_table):
                 print(f"\tmRNA\t"+ out_strand + out_joint + position + out_joint_close + out_strand_close + "\tlocus_tag\t" + mRNA_ID[0])     
 
 
-# input
-args = sys.argv
-gff_file = args[1] # gff input file
-fasta_file = args[2] # fasta input file 
-mol_type = args[3]  # type of molecule 
-organism = args[4] # type of organism
-strain = args[5] # organism strain
-country = args[6] # country
 
 
 # fetching information about assembly gaps and scaffolds from the files
