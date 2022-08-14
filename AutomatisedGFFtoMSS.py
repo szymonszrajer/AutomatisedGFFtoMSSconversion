@@ -43,10 +43,11 @@ organism = args[4] # type of organism
 strain = args[5] # organism strain
 country = args[6] # country
 
-"""
+
 array = []
 
-with fileinput.FileInput(gff_file) as in_file:
+
+with fileinput.FileInput(gff_file) as in_file:  # fetching rec_id, feature start and parent parameters to perform sorting
     for line in in_file: # for every line
         if line[0] != '#' :
             whole_line = line
@@ -60,7 +61,7 @@ with fileinput.FileInput(gff_file) as in_file:
 
 
 gff_tobesorted = pd.DataFrame(array, columns=("rec_id","start","parent","line"))
-sorted_gff = gff_tobesorted.sort_values(by=['rec_id','start','parent'],ascending=[True,True,False])
+sorted_gff = gff_tobesorted.sort_values(by=['rec_id','start','parent'],ascending=[True,True,False]) # sorting gff
 
 
 sorted_gff.to_csv('gff_sorted',columns=['line'],index=False,header=None)
@@ -69,11 +70,11 @@ sorted_gff.to_csv('gff_sorted',columns=['line'],index=False,header=None)
 
 with fileinput.FileInput("gff_sorted", inplace=True) as in_file:
     for line in in_file:
-        line = line.replace('"','').strip("\n")
+        line = line.replace('"','').strip("\n") # making sure the printing format is appropriate
         print(line)
 
 gff_file = "gff_sorted"
-"""
+
 
 #-----------------------------------------------
 #Part 2 GFF to MSS file conversion
@@ -141,7 +142,7 @@ lengths = {} # dictionary of lenghts of Scaffolds - needed for a header of each 
 scaffolds = {} # dictionary with names of scaffolds based on order
 precedence = {} # dictionary of scaffold precedence based on the name
 
-order = 0 # iterating through order 
+order = 0 # iterating through order of scaffolds
 for fasta in fasta_sequences:
     name, length = fasta.id, str(len(fasta.seq))  
     lengths[name] = length 
