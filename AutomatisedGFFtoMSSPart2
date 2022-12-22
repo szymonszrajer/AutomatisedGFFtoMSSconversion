@@ -47,7 +47,6 @@ mss_file = args[2] # converted mss file
 
 filename = "what_to_fix"    # generated file with information how to solve things
 fileW = open(filename, "w")
-"""
 
 with open(transChecker_errors) as in_file:
     for line in in_file:
@@ -85,22 +84,25 @@ with fileinput.FileInput(mss_file, inplace=True) as out_file:
             if flag == 1 : print(line.replace(savedR1,savedR2), end='') # replacement to be done ###
             else :  print(line, end = '') # no replacement
 
-"""
 
 #---------------------------------------------------
-# Syntax errors
+# Syntax errors - some of the common issues with DDBJ file format that can be quickly fixed
 
 
 with fileinput.FileInput(mss_file, inplace = True) as file:
     for line in file:
-        #line = re.sub(r"\(\w+\s\w+.+\)","",line) # remove species names
-        #line = re.sub(r"\\","",line) # remove backslashes
+        line = re.sub(r"\(\w+\s\w+.+\)","",line) # remove species names
+        line = re.sub(r"\\","",line) # remove backslashes
         
-        match  = re.search(r"(Scaffold)([0-9]+)",line) 
+        
+        """
+        match  = re.search(r"(Scaffold)([0-9]+)",line)  # used to changing scaffold names to DDBJ names
         if match:
             replacement = "BOPP0" + str(int(match.group(2)) + 1000000) 
             line = re.sub(match.group(0),replacement,line) # replace "scaffold" with names appointed by the DDBJ
         """
+        
+        """ # can be used for quick fixes
         match  = re.search(r"GBIMM",line) 
         if match:
             replacement = "GBIM" 
@@ -112,9 +114,9 @@ with fileinput.FileInput(mss_file, inplace = True) as file:
             replacement = "Gryllus bimacaulatus" 
             line = re.sub(match.group(0),replacement,line) 
         """
+        """
         line  = re.sub(r"Similar to ", "", line) 
-
-
+        """
         """
         match  = re.search(r"NCBI",line) 
         if match:
