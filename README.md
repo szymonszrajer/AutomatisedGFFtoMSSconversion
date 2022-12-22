@@ -15,22 +15,22 @@ AutomatisedGFFtoMSSPart2.py - fixes errors raised by transchecker and prepares f
 
 General pipeline when converting GFF for submission looks like this:
 
-'''
+''' bash 
 # Call the first script
 python AutomatisedGFFtoMSS.py input1.gff input2.fasta DNA Homo_sapiens - Japan > mss_file.ann
 '''
 
-'''
+''' bash
 # Call transchecker
 transChecker.sh -xmss_file.ann -sinput2.fasta -etransChecker_errors.txt
 '''
 
-'''
+''' bash
 # Call the second script
 python AutomatisedGFFtoMSSPart2.py transChecker_errors.txt mss_file.ann ABCDE
 '''
 
-'''
+''' bash
 # Call jParser for validation
 jParser.sh -xmms_file.ann -sinput2.fasta
 '''
