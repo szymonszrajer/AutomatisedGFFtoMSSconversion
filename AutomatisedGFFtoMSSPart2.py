@@ -43,6 +43,7 @@ def final(location):
 args = sys.argv
 transChecker_errors = args[1] # output of transChecker
 mss_file = args[2] # converted mss file 
+scaffold_name = args[3] # scaffold name appointed by the DDBJ
 
 
 filename = "what_to_fix"    # generated file with information how to solve things
@@ -95,12 +96,12 @@ with fileinput.FileInput(mss_file, inplace = True) as file:
         line = re.sub(r"\\","",line) # remove backslashes
         
         
-        """
+        
         match  = re.search(r"(Scaffold)([0-9]+)",line)  # used to changing scaffold names to DDBJ names
         if match:
-            replacement = "BOPP0" + str(int(match.group(2)) + 1000000) 
+            replacement = str(scaffold_name) + str(int(match.group(2)) + 1000000) 
             line = re.sub(match.group(0),replacement,line) # replace "scaffold" with names appointed by the DDBJ
-        """
+
         
         """ # can be used for quick fixes
         match  = re.search(r"GBIMM",line) 
