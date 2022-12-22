@@ -15,25 +15,25 @@ AutomatisedGFFtoMSSPart2.py - fixes errors raised by transchecker and prepares f
 
 General pipeline when converting GFF for submission looks like this:
 
-''' bash 
+``` bash 
 # Call the first script
 python AutomatisedGFFtoMSS.py input1.gff input2.fasta DNA Homo_sapiens - Japan > mss_file.ann
-'''
+```
 
-''' bash
+``` bash
 # Call transchecker
 transChecker.sh -xmss_file.ann -sinput2.fasta -etransChecker_errors.txt
-'''
+```
 
-''' bash
+``` bash
 # Call the second script
 python AutomatisedGFFtoMSSPart2.py transChecker_errors.txt mss_file.ann ABCDE
-'''
+```
 
-''' bash
+``` bash
 # Call jParser for validation
 jParser.sh -xmms_file.ann -sinput2.fasta
-'''
+```
 
 The finished script by no means covers all of the exceptions that can be present in a mss file and need to be fixed before submission.
 The attached script, called duplicates.py can be used if warnings regarding duplicates are present in the final jParser output.
