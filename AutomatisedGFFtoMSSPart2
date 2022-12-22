@@ -126,3 +126,82 @@ with fileinput.FileInput(mss_file, inplace = True) as file:
 
 
         print(line, end = '')
+        
+        
+#-----------------  extend the correction to mRNA
+
+# Open the input file in read mode
+with open(mss_file, "r") as f:  
+    # Read all the lines in the file
+    g = f.readlines()
+
+# Initialize a flag to False
+flag = False
+
+# Open the output file in write mode
+with open("changed_ann.ann", 'w') as output:
+    # Iterate through all the lines in the input file
+    for line in g:
+        # Search for a specific pattern in the line
+        a = re.search("(\d+\.\.)(>)(\d+)", line)
+
+        # If the pattern is found, set the flag to True
+        if a:
+            reference = line
+            flag = True
+
+        # If the flag is True and the line contains the string "mRNA\t"
+        elif flag and re.search("mRNA\t", line):
+            # Find all substrings that match the pattern "(\d+\.\.)(\d+)" in the line
+            change = re.findall("(\d+\.\.)(\d+)", line)
+            # Remove the last element from the list and assign it to the variable 'pop'
+            pop = change.pop()
+            # Assign the values of the tuple to variables 'old' and 'new'
+            old = pop[0] + pop[1]
+            new = pop[0] + ">" + pop[1]
+            # Replace the old string with the new string in the line
+            line = re.sub(old, new, line)
+            # Set the flag to False
+            flag = False
+
+        # Write the modified line to the output file
+        output.write(line)
+
+# Open the intermediate output file in read mode
+with open("changed_ann.ann", "r") as f:  
+    # Read all the lines in the file
+    g = f.readlines()
+
+# Initialize a flag to False
+flag = False
+
+# Open the final output file in write mode
+with open("final_ann.ann", 'w') as output:
+    # Iterate through all the lines in the intermediate output file
+    for line in g:
+        # Search for a specific pattern in the line
+        a = re.search("(<)(\d+\.\.)(>?)(\d+)", line)
+
+        # If the pattern is found, set the flag to True
+        if a:
+            flag = True
+
+        # If the flag is True and the line contains the string "mRNA\t"
+        elif flag and re.search("mRNA\t", line):
+            # Find all substrings that match the pattern "(\d+\.\.)(>?\d+)" in the line
+            change = re.findall("(\d+\.\.)(>?\d+)", line)
+            # Get the first element from the list and assign it to the variable 'pop'
+            pop = change[0]
+            # Assign the values of the tuple to the variable 'old'
+            old = pop[0] + pop[1]
+            # Create a new string by adding the character '<' to the beginning of 'old'
+            new = "<" + old
+            # Replace the old string with the new string in the line
+            line = re.sub(old, new, line)
+            # Set the flag to False
+            flag = False
+
+        # Write the modified line to the final output file
+        output.write(line)
+
+
